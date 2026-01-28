@@ -18,5 +18,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # REST API endpoints for React frontend
+    path('api/', include('QuestionApp.api_urls')),
+    # Original template-based URLs (kept for backward compatibility)
     path('', include('QuestionApp.urls')),
 ]
+
