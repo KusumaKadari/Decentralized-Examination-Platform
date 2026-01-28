@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Test - Secure Question Papers{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+<nav class="navbar">
+    <span class="navbar-brand">Decentralized Examination Platform</span>
+    <div class="navbar-right">
+        <span class="navbar-user">Student: {{ student_name }}</span>
+        <a href="{% url 'index' %}" class="navbar-link">Logout</a>
+    </div>
+</nav>
+
+<div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a href="{% url 'SelectTest' %}" class="sidebar-link active">Write Exam</a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{% url 'ViewStudentMarks' %}" class="sidebar-link">View Marks</a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{% url 'index' %}" class="sidebar-link">Logout</a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h2>Select Test</h2>
+        <p class="text-muted mb-2">Choose a test to begin your examination</p>
+
+        {% if data %}
+        <div class="alert alert-info">{{ data|safe }}</div>
+        {% endif %}
+
+        {% if no_tests %}
+        <div class="card">
+            <div class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <div class="empty-state-title">No Exams Scheduled</div>
+                <div class="empty-state-text">No exams have been created by teachers yet. Please check back later.</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Available Tests</span>
+            </div>
+
+            {{ tests_html|safe }}
+        </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

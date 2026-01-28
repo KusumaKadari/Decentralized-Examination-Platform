@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Decentralized Examination Platform{% endblock %}
+
+{% block content %}
+<div class="hero">
+	<h1 class="hero-title">Decentralized Examination Platform</h1>
+	<p class="hero-subtitle">
+		Secure Question Papers using Blockchain & IPFS Technology
+	</p>
+
+	<div class="role-cards">
+		<div class="role-card">
+			<div class="role-icon">👨‍💼</div>
+			<div class="role-title">Admin</div>
+			<p class="text-muted" style="font-size: 0.875rem;">Manage users & view data</p>
+			<a href="{% url 'AdminLogin' %}" class="role-link">Login</a>
+		</div>
+
+		<div class="role-card">
+			<div class="role-icon">👨‍🏫</div>
+			<div class="role-title">Teacher</div>
+			<p class="text-muted" style="font-size: 0.875rem;">Add questions & view marks</p>
+			<a href="{% url 'TeacherLogin' %}" class="role-link">Login</a>
+		</div>
+
+		<div class="role-card">
+			<div class="role-icon">👨‍🎓</div>
+			<div class="role-title">Student</div>
+			<p class="text-muted" style="font-size: 0.875rem;">Write exams & view results</p>
+			<a href="{% url 'StudentLogin' %}" class="role-link">Login</a>
+		</div>
+	</div>
+</div>
+{% endblock %}

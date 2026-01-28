@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Test - Secure Question Papers{% endblock %}
+
+{% block extra_js %}
+<script>
+    var questionHashes = {{ question_hashes| safe }};
+    var questionTexts = {{ question_texts| safe }};
+
+    function updateSelectedCount() {
+        var checkboxes = document.querySelectorAll('input[name="selected_questions"]:checked');
+        document.getElementById('selectedCount').textContent = checkboxes.length;
+    }
+
+    function shuffleSelect() {
+        var numQuestions = parseInt(document.getElementById('numQuestions').value);
+        if (isNaN(numQuestions) || numQuestions <= 0) {
+            alert('Please enter a valid number of questions');
+            return;
+        }
+
+        var checkboxes = document.querySelectorAll('input[name="selected_questions"]');
+        var totalQuestions = checkboxes.length;
+
+        if (numQuestions > totalQuestions) {
+            alert('Not enough questions in pool. Maximum: ' + totalQuestions);
+            return;
+        }
+
+        // Deselect all first
+        checkboxes.forEach(function (cb) {
+            cb.checked = false;
+            cb.parentElement.classList.remove('selected');
+        });
+
+        // Randomly select
+        var indices = [];
+        while (indices.length < numQuestions) {
+            var r = Math.floor(Math.random() * totalQuestions);
+            if (indices.indexOf(r) === -1) indices.push(r);
+        }
+
+        indices.forEach(function (i) {
+            checkboxes[i].checked = true;
+            checkboxes[i].parentElement.classList.add('selected');
+        });
+
+        updateSelectedCount();
+    }
+
+    function toggleSelection(checkbox) {
+        if (checkbox.checked) {
+            checkbox.parentElement.classList.add('selected');
+        } else {
+            checkbox.parentElement.classList.remove('selected');
+        }
+        updateSelectedCount();
+    }
+
+    function validateForm() {
+        var testNumber = document.getElementById('testNumber').value.trim();
+        var numQuestions = parseInt(document.getElementById('numQuestions').value);
+        var selected = document.querySelectorAll('input[name="selected_questions"]:checked').length;
+
+        if (testNumber.length == 0) {
+            alert('Please enter a test number/name');
+            return false;
+        }
+        if (selected == 0) {
+            alert('Please select at least one question');
+            return false;
+        }
+        return true;
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+<nav class="navbar">
+    <span class="navbar-brand">Decentralized Examination Platform</span>
+    <div class="navbar-right">
+        <span class="navbar-user">Teacher: {{ teacher_name }}</span>
+        <a href="{% url 'index' %}" class="navbar-link">Logout</a>
+    </div>
+</nav>
+
+<div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a href="{% url 'AddQuestion' %}" class="sidebar-link">Add Questions</a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{% url 'CreateTest' %}" class="sidebar-link active">Create Test</a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{% url 'ViewTeacherMarks' %}" class="sidebar-link">View Student Marks</a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{% url 'index' %}" class="sidebar-link">Logout</a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h2>Create New Test</h2>
+        <p class="text-muted mb-2">Select questions and create a test for students</p>
+
+        {% if data %}
+        <div class="alert alert-info">{{ data|safe }}</div>
+        {% endif %}
+
+        <form method="post" action="{% url 'CreateTestAction' %}" onsubmit="return validateForm()">
+            {% csrf_token %}
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Test Details</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Test Number / Name</label>
+                        <input type="text" name="test_number" id="testNumber" class="form-input"
+                            placeholder="e.g., TEST001 or Midterm Exam">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Number of Questions (for shuffle)</label>
+                        <input type="number" id="numQuestions" class="form-input" placeholder="e.g., 5" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Exam Duration (minutes)</label>
+                        <input type="number" name="duration" id="duration" class="form-input" placeholder="e.g., 30"
+                            min="1" value="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Pass Percentage (%)</label>
+                        <input type="number" name="pass_percentage" id="passPercentage" class="form-input"
+                            placeholder="e.g., 40" min="0" max="100" value="40">
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-shuffle" onclick="shuffleSelect()">🔀 Shuffle / Random
+                    Select</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Question Pool</span>
+                    <span class="selected-count" style="margin-left: 1rem;">Selected: <span
+                            id="selectedCount">0</span></span>
+                </div>
+
+                {% if no_questions %}
+                <p class="text-muted">No questions available. Please add questions first.</p>
+                {% else %}
+                <div class="question-pool">
+                    {{ questions_html|safe }}
+                </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Test</button>
+        </form>
+    </main>
+</div>
+{% endblock %}

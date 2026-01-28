@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard - Secure Question Papers{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+<nav class="navbar">
+	<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+	<span class="navbar-brand">Decentralized Examination Platform</span>
+	<div class="navbar-right">
+		<span class="navbar-user">Teacher</span>
+		<a href="{% url 'index' %}" class="navbar-link">Logout</a>
+	</div>
+</nav>
+
+<div class="dashboard">
+	<!-- Mobile Sidebar Overlay -->
+	<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+	<!-- Sidebar -->
+	<aside class="sidebar" id="sidebar">
+		<ul class="sidebar-nav">
+			<li class="sidebar-item">
+				<a href="{% url 'AddQuestion' %}" class="sidebar-link">➕ Add Questions</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'CreateTest' %}" class="sidebar-link">📋 Create Test</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'ManageTests' %}" class="sidebar-link">⚙️ Manage Tests</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'ViewTeacherMarks' %}" class="sidebar-link">📊 View Marks</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'index' %}" class="sidebar-link">🚪 Logout</a>
+			</li>
+		</ul>
+	</aside>
+
+	<!-- Main Content -->
+	<main class="main-content">
+		<h2>Welcome, Teacher</h2>
+		<p class="text-muted mb-2">Add questions, create tests, and view student performance</p>
+
+		{% if data %}
+		<div class="card">
+			{{ data|safe }}
+		</div>
+		{% endif %}
+
+		{% if img %}
+		<div class="card">
+			<img src="data:image/png;base64, {{ img }}" alt="Chart" style="max-width: 100%;">
+		</div>
+		{% endif %}
+
+		<div class="action-grid">
+			<a href="{% url 'AddQuestion' %}" class="action-card" style="text-decoration: none;">
+				<div class="action-card-icon">➕</div>
+				<div class="action-card-title">Add Questions</div>
+				<div class="action-card-desc">Add new exam questions</div>
+			</a>
+
+			<a href="{% url 'CreateTest' %}" class="action-card" style="text-decoration: none;">
+				<div class="action-card-icon">📋</div>
+				<div class="action-card-title">Create Test</div>
+				<div class="action-card-desc">Create test with questions</div>
+			</a>
+
+			<a href="{% url 'ViewTeacherMarks' %}" class="action-card" style="text-decoration: none;">
+				<div class="action-card-icon">📊</div>
+				<div class="action-card-title">View Marks</div>
+				<div class="action-card-desc">View student results</div>
+			</a>
+		</div>
+	</main>
+</div>
+
+<script>
+	function toggleSidebar() {
+		document.getElementById('sidebar').classList.toggle('open');
+		document.getElementById('sidebarOverlay').classList.toggle('show');
+	}
+</script>
+{% endblock %}

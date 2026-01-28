@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}Write Exam - Secure Question Papers{% endblock %}
+
+{% block extra_js %}
+<script>
+	// Timer and Auto-save Configuration
+	var examDuration = {{ duration }} * 60; // Duration in seconds
+	var totalQuestions = {{ num_questions }};
+	var testNumber = "{{ test_number }}";
+	var storageKey = "exam_" + testNumber + "_answers";
+	var timerInterval;
+	var autoSaveInterval;
+
+	// Initialize exam on page load
+	document.addEventListener('DOMContentLoaded', function () {
+		loadSavedAnswers();
+		startTimer();
+		startAutoSave();
+		updateProgress();
+		setupQuestionListeners();
+	});
+
+	// Timer Functions
+	function startTimer() {
+		updateTimerDisplay();
+		timerInterval = setInterval(function () {
+			examDuration--;
+			updateTimerDisplay();
+
+			if (examDuration <= 0) {
+				clearInterval(timerInterval);
+				clearInterval(autoSaveInterval);
+				clearSavedAnswers();
+				alert('Time is up! Your exam will be submitted automatically.');
+				document.getElementById('examForm').submit();
+			}
+		}, 1000);
+	}
+
+	function updateTimerDisplay() {
+		var minutes = Math.floor(examDuration / 60);
+		var seconds = examDuration % 60;
+		var display = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+		document.getElementById('timerDisplay').textContent = display;
+
+		// Warning colors
+		var timerEl = document.getElementById('examTimer');
+		if (examDuration <= 60) {
+			timerEl.classList.add('critical');
+		} else if (examDuration <= 300) {
+			timerEl.classList.add('warning');
+		}
+	}
+
+	// Progress Functions
+	function updateProgress() {
+		var answered = 0;
+		for (var i = 1; i <= totalQuestions; i++) {
+			var selected = document.querySelector('input[name="t' + i + '"]:checked');
+			if (selected) {
+				answered++;
+				document.getElementById('q' + i + 'Status').classList.add('answered');
+				document.getElementById('q' + i + 'Status').classList.remove('unanswered');
+			} else {
+				document.getElementById('q' + i + 'Status').classList.remove('answered');
+				document.getElementById('q' + i + 'Status').classList.add('unanswered');
+			}
+		}
+
+		var percentage = (answered / totalQuestions) * 100;
+		document.getElementById('progressBar').style.width = percentage + '%';
+		document.getElementById('progressText').textContent = answered + ' of ' + totalQuestions + ' answered';
+		document.getElementById('currentQuestionCount').textContent = answered;
+	}
+
+	function setupQuestionListeners() {
+		var radios = document.querySelectorAll('input[type="radio"]');
+		radios.forEach(function (radio) {
+			radio.addEventListener('change', function () {
+				updateProgress();
+				saveAnswers();
+			});
+		});
+	}
+
+	// Auto-save Functions
+	function startAutoSave() {
+		autoSaveInterval = setInterval(saveAnswers, 30000); // Save every 30 seconds
+	}
+
+	function saveAnswers() {
+		var answers = {};
+		for (var i = 1; i <= totalQuestions; i++) {
+			var selected = document.querySelector('input[name="t' + i + '"]:checked');
+			if (selected) {
+				answers['t' + i] = selected.value;
+			}
+		}
+		localStorage.setItem(storageKey, JSON.stringify(answers));
+		showAutoSaveIndicator();
+	}
+
+	function loadSavedAnswers() {
+		var saved = localStorage.getItem(storageKey);
+		if (saved) {
+			try {
+				var answers = JSON.parse(saved);
+				for (var key in answers) {
+					var radios = document.querySelectorAll('input[name="' + key + '"]');
+					radios.forEach(function (radio) {
+						if (radio.value === answers[key]) {
+							radio.checked = true;
+						}
+					});
+				}
+				console.log('Restored saved answers from localStorage');
+			} catch (e) {
+				console.log('Could not parse saved answers');
+			}
+		}
+	}
+
+	function clearSavedAnswers() {
+		localStorage.removeItem(storageKey);
+	}
+
+	function showAutoSaveIndicator() {
+		var indicator = document.getElementById('autoSaveIndicator');
+		indicator.classList.add('show');
+		setTimeout(function () {
+			indicator.classList.remove('show');
+		}, 2000);
+	}
+
+	// Form submission
+	function submitExam() {
+		if (confirm('Are you sure you want to submit the exam? You cannot make changes after submission.')) {
+			clearSavedAnswers();
+			clearInterval(timerInterval);
+			clearInterval(autoSaveInterval);
+			return true;
+		}
+		return false;
+	}
+
+	// Mobile sidebar toggle
+	function toggleSidebar() {
+		document.getElementById('sidebar').classList.toggle('open');
+		document.getElementById('sidebarOverlay').classList.toggle('show');
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+<nav class="navbar">
+	<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+	<span class="navbar-brand">Decentralized Examination Platform</span>
+	<div class="navbar-right">
+		<span class="navbar-user">Student: {{ student_name }}</span>
+		<a href="{% url 'index' %}" class="navbar-link"
+			onclick="return confirm('Are you sure? Your progress will be saved but the timer will continue.');">Logout</a>
+	</div>
+</nav>
+
+<div class="dashboard">
+	<!-- Mobile Sidebar Overlay -->
+	<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+	<!-- Sidebar -->
+	<aside class="sidebar" id="sidebar">
+		<ul class="sidebar-nav">
+			<li class="sidebar-item">
+				<a href="{% url 'SelectTest' %}" class="sidebar-link active">📝 Write Exam</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'ViewStudentMarks' %}" class="sidebar-link">📊 View Marks</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'index' %}" class="sidebar-link">🚪 Logout</a>
+			</li>
+		</ul>
+
+		<!-- Question Status Panel -->
+		<div class="question-status-panel">
+			<h4>Question Status</h4>
+			<div class="question-status-grid">
+				{% for i in num_questions_range %}
+				<div class="question-status-item unanswered" id="q{{ forloop.counter }}Status">{{ forloop.counter }}
+				</div>
+				{% endfor %}
+			</div>
+			<div class="status-legend">
+				<span class="legend-item"><span class="legend-dot answered"></span> Answered</span>
+				<span class="legend-item"><span class="legend-dot unanswered"></span> Not Answered</span>
+			</div>
+		</div>
+	</aside>
+
+	<!-- Main Content -->
+	<main class="main-content">
+		<h2>Write Exam</h2>
+
+		{% if test_info %}
+		<!-- Exam Info Header with Timer -->
+		<div class="exam-header-bar">
+			<div class="exam-header-info">
+				<div class="test-info-item">
+					<div class="test-info-label">Test</div>
+					<div class="test-info-value">{{ test_number }}</div>
+				</div>
+				<div class="test-info-item">
+					<div class="test-info-label">Conducted By</div>
+					<div class="test-info-value">{{ teacher_name }}</div>
+				</div>
+				<div class="test-info-item">
+					<div class="test-info-label">Questions</div>
+					<div class="test-info-value"><span id="currentQuestionCount">0</span>/{{ num_questions }}</div>
+				</div>
+			</div>
+
+			<!-- Timer Display -->
+			<div class="exam-timer" id="examTimer">
+				<div class="timer-icon">⏱️</div>
+				<div class="timer-text">
+					<div class="timer-label">Time Remaining</div>
+					<div class="timer-value" id="timerDisplay">--:--</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Progress Bar -->
+		<div class="exam-progress">
+			<div class="progress-bar-container">
+				<div class="progress-bar" id="progressBar" style="width: 0%"></div>
+			</div>
+			<div class="progress-info">
+				<span id="progressText">0 of {{ num_questions }} answered</span>
+				<span id="autoSaveIndicator" class="auto-save-indicator">✓ Auto-saved</span>
+			</div>
+		</div>
+		{% endif %}
+
+		{% if data %}
+		<div class="alert alert-info">{{ data|safe }}</div>
+		{% endif %}
+
+		<form method="post" action="{% url 'WriteExamAction' %}" id="examForm" onsubmit="return submitExam()">
+			{% csrf_token %}
+			<input type="hidden" name="test_number" value="{{ test_number }}">
+			<input type="hidden" name="teacher_name" value="{{ teacher_name }}">
+
+			{{ data1|safe }}
+
+			<button type="submit" class="btn btn-primary btn-success" style="margin-top: 1rem;">Submit Exam</button>
+		</form>
+	</main>
+</div>
+{% endblock %}

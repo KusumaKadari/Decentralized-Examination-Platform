@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Add User - Secure Question Papers{% endblock %}
+
+{% block extra_js %}
+<script>
+	function validate(formObj) {
+		if (formObj.t1.value.length == 0) {
+			alert("Please enter username");
+			formObj.t1.focus();
+			return false;
+		}
+		if (formObj.t2.value.length == 0) {
+			alert("Password must be entered");
+			formObj.t2.focus();
+			return false;
+		}
+		if (formObj.t3.value.length == 0) {
+			alert("Please enter phone number");
+			formObj.t3.focus();
+			return false;
+		}
+		if (!formObj.t3.value.match(/^\d{10}$/)) {
+			alert("Valid 10-digit phone number must be entered");
+			formObj.t3.focus();
+			return false;
+		}
+		if (formObj.t4.value.length == 0) {
+			alert("Please enter email");
+			formObj.t4.focus();
+			return false;
+		}
+		var filter = /^([a-zA-Z0-9_\.\-])+\@([a-z]+\.)+(com)+$/;
+		if (!filter.test(formObj.t4.value)) {
+			alert('Please enter valid email address');
+			formObj.t4.focus();
+			return false;
+		}
+		return true;
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+<nav class="navbar">
+	<span class="navbar-brand">Decentralized Examination Platform</span>
+	<div class="navbar-right">
+		<span class="navbar-user">Admin</span>
+		<a href="{% url 'index' %}" class="navbar-link">Logout</a>
+	</div>
+</nav>
+
+<div class="dashboard">
+	<!-- Sidebar -->
+	<aside class="sidebar">
+		<ul class="sidebar-nav">
+			<li class="sidebar-item">
+				<a href="{% url 'AddUser' %}" class="sidebar-link active">Add Teachers/Students</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'ViewQuestions' %}" class="sidebar-link">View Questions</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'ViewMarks' %}" class="sidebar-link">View Student Marks</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'index' %}" class="sidebar-link">Logout</a>
+			</li>
+		</ul>
+	</aside>
+
+	<!-- Main Content -->
+	<main class="main-content">
+		<h2>Add New User</h2>
+		<p class="text-muted mb-2">Register a new teacher or student</p>
+
+		{% if data %}
+		<div class="alert alert-info">{{ data|safe }}</div>
+		{% endif %}
+
+		<div class="card">
+			<form method="post" action="{% url 'AddUserAction' %}" onsubmit="return validate(this)">
+				{% csrf_token %}
+
+				<div class="form-group">
+					<label class="form-label">Username</label>
+					<input type="text" name="t1" class="form-input" placeholder="Enter username">
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Password</label>
+					<input type="password" name="t2" class="form-input" placeholder="Enter password">
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Contact Number</label>
+					<input type="text" name="t3" class="form-input" placeholder="Enter 10-digit phone number">
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Email</label>
+					<input type="email" name="t4" class="form-input" placeholder="Enter email address">
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">User Type</label>
+					<select name="t5" class="form-select">
+						<option value="Teacher">Teacher</option>
+						<option value="Student">Student</option>
+					</select>
+				</div>
+
+				<button type="submit" class="btn btn-primary">Add User</button>
+			</form>
+		</div>
+	</main>
+</div>
+{% endblock %}

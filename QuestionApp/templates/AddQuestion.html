@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Question - Secure Question Papers{% endblock %}
+
+{% block extra_js %}
+<script>
+	function validate(formObj) {
+		if (formObj.t1.value.length == 0) {
+			alert("Please enter question");
+			formObj.t1.focus();
+			return false;
+		}
+		if (formObj.t2.value.length == 0) {
+			alert("Please enter option A");
+			formObj.t2.focus();
+			return false;
+		}
+		if (formObj.t3.value.length == 0) {
+			alert("Please enter option B");
+			formObj.t3.focus();
+			return false;
+		}
+		if (formObj.t4.value.length == 0) {
+			alert("Please enter option C");
+			formObj.t4.focus();
+			return false;
+		}
+		if (formObj.t5.value.length == 0) {
+			alert("Please enter option D");
+			formObj.t5.focus();
+			return false;
+		}
+		if (formObj.t6.value.length == 0) {
+			alert("Please enter correct answer");
+			formObj.t6.focus();
+			return false;
+		}
+		return true;
+	}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+<nav class="navbar">
+	<span class="navbar-brand">Decentralized Examination Platform</span>
+	<div class="navbar-right">
+		<span class="navbar-user">Teacher</span>
+		<a href="{% url 'index' %}" class="navbar-link">Logout</a>
+	</div>
+</nav>
+
+<div class="dashboard">
+	<!-- Sidebar -->
+	<aside class="sidebar">
+		<ul class="sidebar-nav">
+			<li class="sidebar-item">
+				<a href="{% url 'AddQuestion' %}" class="sidebar-link active">Add Questions</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'ViewTeacherMarks' %}" class="sidebar-link">View Student Marks</a>
+			</li>
+			<li class="sidebar-item">
+				<a href="{% url 'index' %}" class="sidebar-link">Logout</a>
+			</li>
+		</ul>
+	</aside>
+
+	<!-- Main Content -->
+	<main class="main-content">
+		<h2>Add New Question</h2>
+		<p class="text-muted mb-2">Add a new MCQ question to the exam</p>
+
+		{% if data %}
+		<div class="alert alert-info">{{ data|safe }}</div>
+		{% endif %}
+
+		<div class="card">
+			<form method="post" action="{% url 'AddQuestionAction' %}" onsubmit="return validate(this)">
+				{% csrf_token %}
+
+				<div class="form-group">
+					<label class="form-label">Question</label>
+					<textarea name="t1" class="form-textarea" placeholder="Enter the question text"></textarea>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Option A</label>
+					<input type="text" name="t2" class="form-input" placeholder="Enter option A">
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Option B</label>
+					<input type="text" name="t3" class="form-input" placeholder="Enter option B">
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Option C</label>
+					<input type="text" name="t4" class="form-input" placeholder="Enter option C">
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Option D</label>
+					<input type="text" name="t5" class="form-input" placeholder="Enter option D">
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Correct Answer</label>
+					<input type="text" name="t6" class="form-input" placeholder="Enter correct answer (A, B, C, or D)">
+				</div>
+
+				<button type="submit" class="btn btn-primary">Add Question</button>
+			</form>
+		</div>
+	</main>
+</div>
+{% endblock %}
