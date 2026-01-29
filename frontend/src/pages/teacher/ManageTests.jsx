@@ -101,7 +101,7 @@ export default function TeacherManageTests() {
                                             <Button
                                                 variant="primary"
                                                 size="sm"
-                                                onClick={() => navigate(`/teacher/view-marks?test=${test.test_number}`)}
+                                                onClick={() => navigate(`/teacher/test-details/${test.index}`)}
                                             >
                                                 View Results
                                             </Button>

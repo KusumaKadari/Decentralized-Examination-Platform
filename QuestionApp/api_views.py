@@ -138,7 +138,7 @@ def users(request):
             
             return Response({
                 'success': True,
-                'message': f'New {user_type} successfully added to Blockchain!',
+                'message': f'New {user_type} successfully added!',
                 'tx_hash': tx_receipt.transactionHash.hex()
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -169,6 +169,10 @@ def questions(request):
                 content = api.get_pyobj(hashcode)
                 content = content.decode()
                 question = content.split("@")
+                
+                # Check for teacher stored in 7th element (index 6)
+                teacher = question[6] if len(question) > 6 else "Kusuma"
+                
                 questions_data.append({
                     'id': i,
                     'hash': hashcode,
@@ -177,7 +181,8 @@ def questions(request):
                     'option_b': question[2],
                     'option_c': question[3],
                     'option_d': question[4],
-                    'correct_answer': question[5]
+                    'correct_answer': question[5],
+                    'teacher': teacher
                 })
             except Exception as e:
                 continue
@@ -188,6 +193,8 @@ def questions(request):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+        teacher = request.data.get('teacher', 'Unknown')
+        
         # Build question string for IPFS
         data = "@".join([
             serializer.validated_data['question'],
@@ -195,7 +202,8 @@ def questions(request):
             serializer.validated_data['option_b'],
             serializer.validated_data['option_c'],
             serializer.validated_data['option_d'],
-            serializer.validated_data['correct_answer']
+            serializer.validated_data['correct_answer'],
+            teacher
         ])
         data = data.encode()
         
@@ -388,10 +396,20 @@ def test_detail(request, test_index):
                     content = api.get_pyobj(hashcode)
                     content = content.decode()
                     question = content.split("@")
+                    
+                    # Return full details for teacher editing/viewing
+                    teacher_uname = question[6] if len(question) > 6 else "Kusuma"
+                    
                     questions_data.append({
                         'id': i,
                         'hash': hashcode,
                         'question': question[0],
+                        'option_a': question[1],
+                        'option_b': question[2],
+                        'option_c': question[3],
+                        'option_d': question[4],
+                        'correct_answer': question[5],
+                        'teacher': teacher_uname,
                         'selected': is_selected
                     })
                 except Exception:

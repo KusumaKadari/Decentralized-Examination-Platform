@@ -55,7 +55,7 @@ export default function AddUser() {
                 <Card>
                     <CardTitle>Add New User</CardTitle>
                     <CardDescription>
-                        Add a new teacher or student to the blockchain
+                        Add a new teacher or student details
                     </CardDescription>
 
                     {message && (
@@ -146,7 +146,7 @@ export default function AddUser() {
                         </div>
 
                         <Button type="submit" loading={loading} className="w-full">
-                            Add User to Blockchain
+                            Add User
                         </Button>
                     </form>
                 </Card>

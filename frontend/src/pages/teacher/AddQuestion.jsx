@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
 import DashboardLayout from '../../components/layout/DashboardLayout'
 import Card, { CardTitle, CardDescription } from '../../components/ui/Card'
 import Input from '../../components/ui/Input'
@@ -18,6 +19,8 @@ export default function AddQuestion() {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState(null)
 
+    const { user } = useAuth()
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
@@ -27,15 +30,22 @@ export default function AddQuestion() {
         setLoading(true)
         setMessage(null)
 
-        // Validate that correct answer matches one of the options (A, B, C, D) or the text?
-        // The backend Smart Contract expects 'a', 'b', 'c', 'd'.
-        // The previous frontend used dropdown or radio.
-        // Let's use a select for correct answer to ensure 'a','b','c','d'.
-
         try {
-            const response = await questionsAPI.create(formData)
+            // Include teacher username in request
+            const dataToSend = {
+                ...formData,
+                teacher: user?.username || 'Unknown'
+            }
+
+            const response = await questionsAPI.create(dataToSend)
             if (response.data.success) {
                 setMessage({ type: 'success', text: response.data.message })
+
+                // Auto-dismiss success message
+                setTimeout(() => {
+                    setMessage(null)
+                }, 3000)
+
                 setFormData({
                     question: '',
                     option_a: '',
@@ -63,7 +73,7 @@ export default function AddQuestion() {
                 <Card>
                     <CardTitle>Add New Question</CardTitle>
                     <CardDescription>
-                        Add a multiple-choice question to the global question bank (IPFS)
+                        Add a multiple-choice question to the global question bank
                     </CardDescription>
 
                     {message && (

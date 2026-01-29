@@ -17,6 +17,7 @@ import CreateTest from './pages/teacher/CreateTest'
 import TeacherManageTests from './pages/teacher/ManageTests'
 import TeacherViewMarks from './pages/teacher/ViewMarks'
 import EditTest from './pages/teacher/EditTest'
+import ViewTestDetails from './pages/teacher/ViewTestDetails'
 
 import StudentLogin from './pages/student/Login'
 import StudentDashboard from './pages/student/Dashboard'
@@ -136,6 +137,14 @@ function App() {
                 element={
                     <ProtectedRoute allowedRoles={['Teacher']}>
                         <EditTest />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/teacher/test-details/:testIndex"
+                element={
+                    <ProtectedRoute allowedRoles={['Teacher']}>
+                        <ViewTestDetails />
                     </ProtectedRoute>
                 }
             />
